@@ -17,6 +17,7 @@ type EventData struct {
 	ClientID string
 }
 
+// Client is a structure of connected client object
 type Client struct {
 	ID         string
 	Channel    chan EventData

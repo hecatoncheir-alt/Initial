@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// Server is an object of socket server structure
 type Server struct {
 	APIVersion string
 	HTTPServer *http.Server
@@ -18,6 +19,7 @@ type Server struct {
 	headersUpgrader websocket.Upgrader
 }
 
+// New is constructor for socket server
 func New(apiVersion string) *Server {
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -34,6 +36,7 @@ func New(apiVersion string) *Server {
 	return &socketServer
 }
 
+// SetUp is a method for listen server on port
 func (server *Server) SetUp(host string, port int) error {
 	server.HTTPServer = &http.Server{Addr: fmt.Sprintf("%v:%v", host, port)}
 	server.HTTPServer.Handler = http.HandlerFunc(server.ClientConnectedHandler)
@@ -42,6 +45,7 @@ func (server *Server) SetUp(host string, port int) error {
 	return nil
 }
 
+// ClientConnectedHandler handler for connected client
 func (server *Server) ClientConnectedHandler(response http.ResponseWriter, request *http.Request) {
 	socketConnection, err := server.headersUpgrader.Upgrade(response, request, nil)
 	if err != nil {
