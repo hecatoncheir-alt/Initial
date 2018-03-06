@@ -3,6 +3,8 @@ package engine
 import (
 	"github.com/hecatoncheir/Initial/engine/broker"
 	"github.com/hecatoncheir/Initial/engine/socket"
+
+	httpServer "github.com/hecatoncheir/Initial/engine/http"
 )
 
 // Engine is a main object of engine pkg
@@ -10,6 +12,7 @@ type Engine struct {
 	APIVersion string
 	Broker     *broker.Broker
 	Socket     *socket.Server
+	HTTP       *httpServer.Server
 }
 
 // New is a constructor for Engine
@@ -24,6 +27,18 @@ func (engine *Engine) SetUpBroker(host string, port int) error {
 	engine.Broker = bro
 
 	err := bro.Connect(host, port)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (engine *Engine) SetUpHttpServer(host string, port int) error {
+	httpServ := httpServer.New(engine.APIVersion)
+	engine.HTTP = httpServ
+
+	err := httpServ.SetUp(host, port)
 	if err != nil {
 		return err
 	}

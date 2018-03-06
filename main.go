@@ -15,14 +15,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	puffer := engine.New(config.ApiVersion)
+	puffer := engine.New(config.APIVersion)
+
+	go puffer.SetUpSocketServer(config.Production.SocketServer.Host, config.Production.SocketServer.Port)
+	go puffer.SetUpHttpServer(config.Production.HTTPServer.Host, config.Production.HTTPServer.Port)
 
 	err = puffer.SetUpBroker(config.Production.Broker.Host, config.Production.Broker.Port)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	channel, err := puffer.Broker.ListenTopic(config.ApiVersion, config.Production.Channel)
+	channel, err := puffer.Broker.ListenTopic(config.APIVersion, config.Production.Channel)
 	if err != nil {
 		log.Fatal(err)
 	}
