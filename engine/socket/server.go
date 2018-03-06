@@ -40,8 +40,8 @@ func New(apiVersion string) *Server {
 func (server *Server) SetUp(host string, port int) error {
 	server.HTTPServer = &http.Server{Addr: fmt.Sprintf("%v:%v", host, port)}
 	server.HTTPServer.Handler = http.HandlerFunc(server.ClientConnectedHandler)
-	server.HTTPServer.ListenAndServe()
 	fmt.Printf("Socket server listen on %v, port:%v \n", host, port)
+	server.HTTPServer.ListenAndServe()
 	return nil
 }
 
