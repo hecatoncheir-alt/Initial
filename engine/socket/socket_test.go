@@ -4,6 +4,8 @@ import (
 	"sync"
 	"testing"
 
+	"fmt"
+	"github.com/hecatoncheir/Initial/configuration"
 	"golang.org/x/net/websocket"
 )
 
@@ -15,7 +17,8 @@ var (
 func SetUpSocketServer() {
 	testServer := New("v1.0")
 	goroutines.Done()
-	testServer.SetUp("localhost", 8181)
+	config, _ := configuration.GetConfiguration()
+	testServer.SetUp(config.Development.SocketServer.Host, config.Development.SocketServer.Port)
 	defer testServer.HTTPServer.Close()
 }
 
@@ -24,7 +27,12 @@ func TestSocketServerCanHandleEvents(test *testing.T) {
 	go once.Do(SetUpSocketServer)
 	goroutines.Wait()
 
-	socketConnection, err := websocket.Dial("ws://localhost:8181", "", "http://localhost:8181")
+	config, _ := configuration.GetConfiguration()
+
+	iriOfWebSocketServer := fmt.Sprintf("ws://%v:%v", config.Development.SocketServer.Host, config.Development.SocketServer.Port)
+	iriOfHttpServer := fmt.Sprintf("http://%v:%v", config.Development.SocketServer.Host, config.Development.SocketServer.Port)
+
+	socketConnection, err := websocket.Dial(iriOfWebSocketServer, "", iriOfHttpServer)
 	if err != nil {
 		test.Error(err)
 	}
