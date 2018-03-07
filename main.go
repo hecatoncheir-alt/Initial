@@ -18,7 +18,7 @@ func main() {
 	puffer := engine.New(config.APIVersion)
 
 	go puffer.SetUpSocketServer(config.Production.SocketServer.Host, config.Production.SocketServer.Port)
-	go puffer.SetUpHttpServer(config.Production.HTTPServer.Host, config.Production.HTTPServer.Port)
+	go puffer.SetUpHttpServer(config.Production.HTTPServer.StaticFilesDirectory, config.Production.HTTPServer.Host, config.Production.HTTPServer.Port)
 
 	err = puffer.SetUpBroker(config.Production.Broker.Host, config.Production.Broker.Port)
 	if err != nil {

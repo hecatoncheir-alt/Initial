@@ -22,7 +22,8 @@ func New(apiVersion string) *Server {
 	return &server
 }
 
-func (server *Server) SetUp(host string, port int) error {
+func (server *Server) SetUp(staticFilesDirectory, host string, port int) error {
+	server.router.NotFound = http.FileServer(http.Dir(staticFilesDirectory))
 	server.router.GET("/api/version", server.apiVersionCheckHandler)
 
 	server.HTTPServer = &http.Server{Addr: fmt.Sprintf("%v:%v", host, port)}

@@ -18,8 +18,9 @@ type Configuration struct {
 		}
 
 		HTTPServer struct {
-			Host string
-			Port int
+			Host                 string
+			Port                 int
+			StaticFilesDirectory string
 		}
 
 		SocketServer struct {
@@ -108,6 +109,13 @@ func GetConfiguration() (Configuration, error) {
 		}
 
 		configuration.Production.HTTPServer.Port = port
+	}
+
+	productionHTTPServerStaticFilesDirectoryFromEnvironment := os.Getenv("Production-HTTPServer-StaticFilesDirectory")
+	if productionHTTPServerStaticFilesDirectoryFromEnvironment == "" {
+		configuration.Production.HTTPServer.StaticFilesDirectory = "build/web"
+	} else {
+		configuration.Production.HTTPServer.StaticFilesDirectory = productionHTTPServerStaticFilesDirectoryFromEnvironment
 	}
 
 	// SocketServer Production

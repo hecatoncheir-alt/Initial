@@ -34,11 +34,11 @@ func (engine *Engine) SetUpBroker(host string, port int) error {
 	return nil
 }
 
-func (engine *Engine) SetUpHttpServer(host string, port int) error {
+func (engine *Engine) SetUpHttpServer(staticFilesDirectory, host string, port int) error {
 	httpServ := httpServer.New(engine.APIVersion)
 	engine.HTTP = httpServ
 
-	err := httpServ.SetUp(host, port)
+	err := httpServ.SetUp(staticFilesDirectory, host, port)
 	if err != nil {
 		return err
 	}
