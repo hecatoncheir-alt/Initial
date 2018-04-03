@@ -20,7 +20,7 @@ func SetUpServer() {
 	server := New("vtest1")
 	goroutines.Done()
 	config, _ := configuration.GetConfiguration()
-	server.SetUp(config.Development.HTTPServer.Host, config.Development.HTTPServer.Port)
+	server.SetUp("", config.Development.HTTPServer.Host, config.Development.HTTPServer.Port)
 }
 
 func TestHttpServerCanSendVersionOfAPI(test *testing.T) {
