@@ -47,8 +47,7 @@ func TestSocketServerCanHandleEvents(test *testing.T) {
 		for {
 			messageFromServer := EventData{}
 			err = websocket.JSON.Receive(socketConnection, &messageFromServer)
-			messageFromServer.ClientID = messageFromServer.ClientID
-
+			messageFromServer.ClientID = messageFromServer.Details["ClientID"].(string)
 			if err != nil {
 				test.Error(err)
 				break
