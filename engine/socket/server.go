@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
+	"github.com/hecatoncheir/Initial/engine/broker"
 )
 
 // Server is an object of socket server structure
@@ -15,14 +16,16 @@ type Server struct {
 	APIVersion string
 	HTTPServer *http.Server
 	Clients    map[string]*Client
-	Log        *log.Logger
+
+	Broker *broker.Broker
+	Log    *log.Logger
 
 	clientsMutex    sync.Mutex
 	headersUpgrader websocket.Upgrader
 }
 
 // New is constructor for socket server
-func New(apiVersion string) *Server {
+func New(apiVersion string, broker *broker.Broker) *Server {
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -33,7 +36,7 @@ func New(apiVersion string) *Server {
 		APIVersion:      apiVersion,
 		Clients:         make(map[string]*Client),
 		headersUpgrader: upgrader,
-	}
+		Broker:          broker}
 
 	socketServer.Log = log.New(os.Stdout, "SocketServer: ", 3)
 	return &socketServer
@@ -80,6 +83,9 @@ func (server *Server) listenConnectedClient(client *Client) {
 				Details: map[string]interface{}{"API version": server.APIVersion}}
 
 			server.Clients[event.ClientID].Write(message.Message, message.Details)
+
+		case "Need items by name":
+			server.Broker.WriteToTopic(server.APIVersion, event)
 
 		default:
 			server.WriteToAll(event.Message, event.Details)

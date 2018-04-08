@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"fmt"
+
 	"github.com/hecatoncheir/Initial/configuration"
 	"golang.org/x/net/websocket"
 )
@@ -15,7 +16,7 @@ var (
 )
 
 func SetUpSocketServer() {
-	testServer := New("v1.0")
+	testServer := New("v1.0", nil)
 	goroutines.Done()
 	config, _ := configuration.GetConfiguration()
 	testServer.SetUp(config.Development.SocketServer.Host, config.Development.SocketServer.Port)
@@ -46,7 +47,7 @@ func TestSocketServerCanHandleEvents(test *testing.T) {
 		for {
 			messageFromServer := EventData{}
 			err = websocket.JSON.Receive(socketConnection, &messageFromServer)
-			messageFromServer.ClientID = messageFromServer.Data["ClientID"].(string)
+			messageFromServer.ClientID = messageFromServer.ClientID
 
 			if err != nil {
 				test.Error(err)
@@ -66,7 +67,7 @@ func TestSocketServerCanHandleEvents(test *testing.T) {
 
 	for messageFromServer := range inputMessage {
 		if messageFromServer.Message != "Version of API" ||
-			messageFromServer.Data["API version"] != "v1.0" {
+			messageFromServer.Details["API version"] != "v1.0" {
 			test.Fail()
 		}
 		break

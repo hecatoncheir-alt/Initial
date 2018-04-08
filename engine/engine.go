@@ -46,8 +46,8 @@ func (engine *Engine) SetUpHttpServer(staticFilesDirectory, host string, port in
 	return nil
 }
 
-func (engine *Engine) SetUpSocketServer(host string, port int) error {
-	socketServer := socket.New(engine.APIVersion)
+func (engine *Engine) SetUpSocketServer(host string, port int, broker *broker.Broker) error {
+	socketServer := socket.New(engine.APIVersion, broker)
 	engine.Socket = socketServer
 
 	err := socketServer.SetUp(host, port)
