@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -14,6 +15,7 @@ type Server struct {
 	APIVersion string
 	HTTPServer *http.Server
 	Clients    map[string]*Client
+	Log        *log.Logger
 
 	clientsMutex    sync.Mutex
 	headersUpgrader websocket.Upgrader
@@ -33,6 +35,7 @@ func New(apiVersion string) *Server {
 		headersUpgrader: upgrader,
 	}
 
+	socketServer.Log = log.New(os.Stdout, "SocketServer: ", 3)
 	return &socketServer
 }
 
@@ -40,7 +43,7 @@ func New(apiVersion string) *Server {
 func (server *Server) SetUp(host string, port int) error {
 	server.HTTPServer = &http.Server{Addr: fmt.Sprintf("%v:%v", host, port)}
 	server.HTTPServer.Handler = http.HandlerFunc(server.ClientConnectedHandler)
-	fmt.Printf("Socket server listen on %v, port:%v \n", host, port)
+	server.Log.Printf("Socket server listen on %v, port:%v \n", host, port)
 	server.HTTPServer.ListenAndServe()
 	return nil
 }
@@ -59,23 +62,27 @@ func (server *Server) ClientConnectedHandler(response http.ResponseWriter, reque
 	server.Clients[client.ID] = client
 	server.clientsMutex.Unlock()
 
+	server.Log.Printf("Client: %v connected. Connected clients: %v", client.ID, len(server.Clients))
+
 	go server.listenConnectedClient(client)
 }
 
 // listenConnectedClient need for receive and broadcast client messages
 func (server *Server) listenConnectedClient(client *Client) {
 	for event := range client.Channel {
+		server.Log.Printf("Received event: %v from connected client: %v", event, client.ID)
+
 		switch event.Message {
 		case "Need api version":
 
 			message := EventData{
 				Message: "Version of API",
-				Data:    map[string]interface{}{"API version": server.APIVersion}}
+				Details: map[string]interface{}{"API version": server.APIVersion}}
 
-			server.Clients[event.ClientID].Write(message.Message, message.Data)
+			server.Clients[event.ClientID].Write(message.Message, message.Details)
 
 		default:
-			server.WriteToAll(event.Message, event.Data)
+			server.WriteToAll(event.Message, event.Details)
 		}
 	}
 

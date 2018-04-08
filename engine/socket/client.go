@@ -2,7 +2,7 @@ package socket
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"os"
 	"sync"
 
@@ -13,7 +13,7 @@ import (
 // EventData is a struct of event for receive from socket server
 type EventData struct {
 	Message  string
-	Data     map[string]interface{}
+	Details  map[string]interface{}
 	ClientID string
 }
 
@@ -23,6 +23,7 @@ type Client struct {
 	Channel    chan EventData
 	Connection *websocket.Conn
 	wmu        sync.Mutex
+	Log        *log.Logger
 }
 
 // NewConnectedClient for constructor for Client
@@ -33,6 +34,8 @@ func NewConnectedClient(clientConnection *websocket.Conn) *Client {
 		Connection: clientConnection,
 		Channel:    make(chan EventData)}
 
+	client.Log = log.New(os.Stdout, "Connected client: ", 3)
+
 	go func() {
 		for {
 
@@ -40,8 +43,8 @@ func NewConnectedClient(clientConnection *websocket.Conn) *Client {
 			_, messageBytes, err := clientConnection.ReadMessage()
 
 			if err != nil {
-				fmt.Fprintf(os.Stdout, "Can't receive message from %s. %v \n", client.ID, err)
-				fmt.Fprintf(os.Stdout, "Closed connection of client %s \n", client.ID)
+				client.Log.Printf("Can't receive message from %s. %v \n", client.ID, err)
+				client.Log.Printf("Closed connection of client %s \n", client.ID)
 				close(client.Channel)
 				break
 			}
@@ -59,7 +62,7 @@ func NewConnectedClient(clientConnection *websocket.Conn) *Client {
 // Write need for send event to client
 func (client *Client) Write(message string, data map[string]interface{}) {
 	data["ClientID"] = client.ID
-	event := map[string]interface{}{"Message": message, "Data": data}
+	event := map[string]interface{}{"Message": message, "Details": data}
 	client.wmu.Lock()
 	client.Connection.WriteJSON(event)
 	client.wmu.Unlock()

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 
 	nsq "github.com/bitly/go-nsq"
@@ -15,6 +16,7 @@ func New() *Broker {
 	broker.configuration = nsq.NewConfig()
 	// broker.сonfiguration.MaxInFlight = 6
 	// broker.сonfiguration.MsgTimeout = time.Duration(time.Second * 6)
+	broker.Log = log.New(os.Stdout, "Broker: ", 3)
 	return &broker
 }
 
@@ -24,6 +26,7 @@ type Broker struct {
 	Port          int
 	configuration *nsq.Config
 	Producer      *nsq.Producer
+	Log           *log.Logger
 }
 
 // connectToMessageBroker method for connect to message broker
@@ -37,8 +40,10 @@ func (broker *Broker) connectToMessageBroker(host string, port int) (*nsq.Produc
 	producer, err := nsq.NewProducer(hostAddr, broker.configuration)
 
 	if err != nil {
-		log.Print("Could not connect to message broker")
+		broker.Log.Print("Could not connect to message broker")
 	}
+
+	broker.Log.Printf("Connected to message broker")
 
 	return producer, err
 

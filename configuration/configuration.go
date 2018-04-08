@@ -101,7 +101,7 @@ func GetConfiguration() (Configuration, error) {
 
 	productionHTTPServerPortFromEnvironment := os.Getenv("Production-HTTPServer-Port")
 	if productionHTTPServerPortFromEnvironment == "" {
-		configuration.Production.HTTPServer.Port = 8080
+		configuration.Production.HTTPServer.Port = 80
 	} else {
 		port, err := strconv.Atoi(productionHTTPServerPortFromEnvironment)
 		if err != nil {
@@ -128,7 +128,7 @@ func GetConfiguration() (Configuration, error) {
 
 	productionSocketServerPortFromEnvironment := os.Getenv("Production-SocketServer-Port")
 	if productionSocketServerPortFromEnvironment == "" {
-		configuration.Production.SocketServer.Port = 8081
+		configuration.Production.SocketServer.Port = 81
 	} else {
 		port, err := strconv.Atoi(productionSocketServerPortFromEnvironment)
 		if err != nil {
