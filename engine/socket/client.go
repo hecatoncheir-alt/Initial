@@ -13,7 +13,7 @@ import (
 // EventData is a struct of event for receive from socket server
 type EventData struct {
 	Message  string
-	Details  map[string]interface{}
+	Data     string
 	ClientID string
 }
 
@@ -61,8 +61,13 @@ func NewConnectedClient(clientConnection *websocket.Conn) *Client {
 
 // Write need for send event to client
 func (client *Client) Write(message string, data map[string]interface{}) {
-	data["ClientID"] = client.ID
-	event := map[string]interface{}{"Message": message, "Details": data}
+
+	byte, _ := json.Marshal(data)
+	event := EventData{
+		ClientID: client.ID,
+		Message:  message,
+		Data:     string(byte)}
+
 	client.wmu.Lock()
 	client.Connection.WriteJSON(event)
 	client.wmu.Unlock()

@@ -1,6 +1,7 @@
 package socket
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -78,17 +79,15 @@ func (server *Server) listenConnectedClient(client *Client) {
 		switch event.Message {
 		case "Need api version":
 
-			message := EventData{
-				Message: "Version of API",
-				Details: map[string]interface{}{"API version": server.APIVersion}}
-
-			server.Clients[event.ClientID].Write(message.Message, message.Details)
+			server.Clients[event.ClientID].Write("Version of API", map[string]interface{}{"API version": server.APIVersion})
 
 		case "Need items by name":
 			server.Broker.WriteToTopic(server.APIVersion, event)
 
 		default:
-			server.WriteToAll(event.Message, event.Details)
+			eventData := map[string]interface{}{}
+			json.Unmarshal([]byte(event.Data), &eventData)
+			server.WriteToAll(event.Message, eventData)
 		}
 	}
 

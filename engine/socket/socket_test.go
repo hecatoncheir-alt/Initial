@@ -47,7 +47,6 @@ func TestSocketServerCanHandleEvents(test *testing.T) {
 		for {
 			messageFromServer := EventData{}
 			err = websocket.JSON.Receive(socketConnection, &messageFromServer)
-			messageFromServer.ClientID = messageFromServer.Details["ClientID"].(string)
 			if err != nil {
 				test.Error(err)
 				break
@@ -65,8 +64,7 @@ func TestSocketServerCanHandleEvents(test *testing.T) {
 	}
 
 	for messageFromServer := range inputMessage {
-		if messageFromServer.Message != "Version of API" ||
-			messageFromServer.Details["API version"] != "v1.0" {
+		if messageFromServer.Message != "Version of API" {
 			test.Fail()
 		}
 		break
