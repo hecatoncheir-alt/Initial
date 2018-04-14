@@ -78,16 +78,24 @@ func (server *Server) listenConnectedClient(client *Client) {
 
 		switch event.Message {
 		case "Need api version":
+			type APIVersion struct {
+				APIVersion string `json:"API version"`
+			}
 
-			server.Clients[event.ClientID].Write("Version of API", map[string]interface{}{"API version": server.APIVersion})
+			apiv := APIVersion{APIVersion: server.APIVersion}
+
+			eventData, err := json.Marshal(apiv)
+			if err != nil {
+				log.Println(err)
+			}
+
+			server.Clients[event.ClientID].Write("Version of API", string(eventData))
 
 		case "Need items by name":
 			server.Broker.WriteToTopic(server.APIVersion, event)
 
 		default:
-			eventData := map[string]interface{}{}
-			json.Unmarshal([]byte(event.Data), &eventData)
-			server.WriteToAll(event.Message, eventData)
+			server.WriteToAll(event.Message, event.Data)
 		}
 	}
 
@@ -97,8 +105,18 @@ func (server *Server) listenConnectedClient(client *Client) {
 }
 
 // WriteToAll send events to all connected clients
-func (server *Server) WriteToAll(message string, data map[string]interface{}) {
+func (server *Server) WriteToAll(message string, data string) {
 	for _, connection := range server.Clients {
 		go connection.Write(message, data)
+	}
+}
+
+// WriteToClient send events to all connected clients
+func (server *Server) WriteToClient(clientID, message string, data string) {
+	for _, connection := range server.Clients {
+		if connection.ID == clientID {
+			go connection.Write(message, data)
+			break
+		}
 	}
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/hecatoncheir/Initial/configuration"
 	"github.com/hecatoncheir/Initial/engine"
+	"github.com/hecatoncheir/Initial/engine/socket"
 )
 
 func main() {
@@ -32,9 +33,15 @@ func main() {
 	}
 
 	for event := range channel {
-		data := map[string]string{}
-		json.Unmarshal(event, &data)
+		details := socket.EventData{}
+		json.Unmarshal(event, &details)
+		log.Println(fmt.Sprintf("Received message: '%v'", details.Message))
 
-		log.Println(fmt.Sprintf("Received message: '%v'", data["Message"]))
+		switch details.Message {
+		case "Items by name ready":
+			puffer.Socket.WriteToClient(details.ClientID, details.Message, details.Data)
+		case "Items by name not found":
+			puffer.Socket.WriteToClient(details.ClientID, details.Message, details.Data)
+		}
 	}
 }
