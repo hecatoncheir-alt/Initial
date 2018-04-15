@@ -1,7 +1,6 @@
 package socket
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,9 +13,9 @@ import (
 
 // Server is an object of socket server structure
 type Server struct {
-	APIVersion string
-	HTTPServer *http.Server
-	Clients    map[string]*Client
+	APIVersion, SprootChannel string
+	HTTPServer                *http.Server
+	Clients                   map[string]*Client
 
 	Broker *broker.Broker
 	Log    *log.Logger
@@ -26,7 +25,7 @@ type Server struct {
 }
 
 // New is constructor for socket server
-func New(apiVersion string, broker *broker.Broker) *Server {
+func New(apiVersion string, broker *broker.Broker, sprootChannel string) *Server {
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -35,6 +34,7 @@ func New(apiVersion string, broker *broker.Broker) *Server {
 
 	socketServer := Server{
 		APIVersion:      apiVersion,
+		SprootChannel:   sprootChannel,
 		Clients:         make(map[string]*Client),
 		headersUpgrader: upgrader,
 		Broker:          broker}
@@ -78,24 +78,10 @@ func (server *Server) listenConnectedClient(client *Client) {
 
 		switch event.Message {
 		case "Need api version":
-			type APIVersion struct {
-				APIVersion string `json:"API version"`
-			}
-
-			apiv := APIVersion{APIVersion: server.APIVersion}
-
-			eventData, err := json.Marshal(apiv)
-			if err != nil {
-				log.Println(err)
-			}
-
-			server.Clients[event.ClientID].Write("Version of API", string(eventData))
+			server.Clients[event.ClientID].Write("Version of API", server.APIVersion, "")
 
 		case "Need items by name":
-			server.Broker.WriteToTopic(server.APIVersion, event)
-
-		default:
-			server.WriteToAll(event.Message, event.Data)
+			server.Broker.WriteToTopic(server.SprootChannel, event)
 		}
 	}
 
@@ -107,15 +93,15 @@ func (server *Server) listenConnectedClient(client *Client) {
 // WriteToAll send events to all connected clients
 func (server *Server) WriteToAll(message string, data string) {
 	for _, connection := range server.Clients {
-		go connection.Write(message, data)
+		go connection.Write(message, server.APIVersion, data)
 	}
 }
 
 // WriteToClient send events to all connected clients
-func (server *Server) WriteToClient(clientID, message string, data string) {
+func (server *Server) WriteToClient(clientID, message, APIVersion, data string) {
 	for _, connection := range server.Clients {
 		if connection.ID == clientID {
-			go connection.Write(message, data)
+			go connection.Write(message, server.APIVersion, data)
 			break
 		}
 	}

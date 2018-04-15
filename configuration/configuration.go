@@ -11,8 +11,10 @@ type Configuration struct {
 	APIVersion string
 
 	Production struct {
-		Channel string
-		Broker  struct {
+		InitialTopic string
+		SprootTopic  string
+
+		Broker struct {
 			Host string
 			Port int
 		}
@@ -30,8 +32,10 @@ type Configuration struct {
 	}
 
 	Development struct {
-		Channel string
-		Broker  struct {
+		InitialTopic string
+		SprootTopic  string
+
+		Broker struct {
 			Host string
 			Port int
 		}
@@ -53,23 +57,37 @@ func GetConfiguration() (Configuration, error) {
 
 	apiVersion := os.Getenv("Api-Version")
 	if apiVersion == "" {
-		configuration.APIVersion = "v1"
+		configuration.APIVersion = "1.0.0"
 	} else {
 		configuration.APIVersion = apiVersion
 	}
 
-	productionParserChannel := os.Getenv("Production-Channel")
-	if productionParserChannel == "" {
-		configuration.Production.Channel = "Initial"
+	productionInitialTopic := os.Getenv("Production-Initial-Topic")
+	if productionInitialTopic == "" {
+		configuration.Production.InitialTopic = "Initial"
 	} else {
-		configuration.Production.Channel = productionParserChannel
+		configuration.Production.InitialTopic = productionInitialTopic
 	}
 
-	developmentParserChannel := os.Getenv("Development-Channel")
-	if developmentParserChannel == "" {
-		configuration.Development.Channel = "test"
+	productionSprootTopic := os.Getenv("Production-Sproot-Topic")
+	if productionSprootTopic == "" {
+		configuration.Production.SprootTopic = "Sproot"
 	} else {
-		configuration.Development.Channel = developmentParserChannel
+		configuration.Production.SprootTopic = productionSprootTopic
+	}
+
+	developmentInitialTopic := os.Getenv("Development-Initial-Topic")
+	if developmentInitialTopic == "" {
+		configuration.Development.InitialTopic = "DevInitial"
+	} else {
+		configuration.Development.InitialTopic = developmentInitialTopic
+	}
+
+	developmentSprootTopic := os.Getenv("Development-Sproot-Topic")
+	if developmentSprootTopic == "" {
+		configuration.Development.SprootTopic = "DevSproot"
+	} else {
+		configuration.Development.SprootTopic = developmentSprootTopic
 	}
 
 	productionBrokerHostFromEnvironment := os.Getenv("Production-Broker-Host")

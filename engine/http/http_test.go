@@ -17,7 +17,7 @@ var (
 )
 
 func SetUpServer() {
-	server := New("vtest1")
+	server := New("v1")
 	goroutines.Done()
 	config, _ := configuration.GetConfiguration()
 	server.SetUp("", config.Development.HTTPServer.Host, config.Development.HTTPServer.Port)
@@ -48,7 +48,7 @@ func TestHttpServerCanSendVersionOfAPI(test *testing.T) {
 		test.Fatal(err)
 	}
 
-	if decodedBody["apiVersion"] != "vtest1" {
+	if decodedBody["apiVersion"] != "v1" {
 		fmt.Println("The api version should be the same.")
 		test.Fail()
 	}

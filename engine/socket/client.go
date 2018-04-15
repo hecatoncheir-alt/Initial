@@ -12,9 +12,10 @@ import (
 
 // EventData is a struct of event for receive from socket server
 type EventData struct {
-	Message  string
-	Data     string
-	ClientID string
+	Message    string
+	Data       string
+	APIVersion string
+	ClientID   string
 }
 
 // Client is a structure of connected client object
@@ -60,12 +61,13 @@ func NewConnectedClient(clientConnection *websocket.Conn) *Client {
 }
 
 // Write need for send event to client
-func (client *Client) Write(message, data string) {
+func (client *Client) Write(message, APIVersion, data string) {
 
 	event := EventData{
-		ClientID: client.ID,
-		Message:  message,
-		Data:     data}
+		ClientID:   client.ID,
+		Message:    message,
+		APIVersion: APIVersion,
+		Data:       data}
 
 	client.wmu.Lock()
 	client.Connection.WriteJSON(event)

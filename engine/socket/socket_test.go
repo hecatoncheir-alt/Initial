@@ -16,7 +16,7 @@ var (
 )
 
 func SetUpSocketServer() {
-	testServer := New("v1.0", nil)
+	testServer := New("v1.0", nil, "")
 	goroutines.Done()
 	config, _ := configuration.GetConfiguration()
 	testServer.SetUp(config.Development.SocketServer.Host, config.Development.SocketServer.Port)

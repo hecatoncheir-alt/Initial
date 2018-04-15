@@ -23,11 +23,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	go puffer.SetUpSocketServer(config.Production.SocketServer.Host, config.Production.SocketServer.Port, puffer.Broker)
+	go puffer.SetUpSocketServer(config.Production.SocketServer.Host, config.Production.SocketServer.Port, puffer.Broker, config.Production.SprootTopic)
 
+	/// Send messages to other nsq channels
 	go puffer.SetUpHttpServer(config.Production.HTTPServer.StaticFilesDirectory, config.Production.HTTPServer.Host, config.Production.HTTPServer.Port)
 
-	channel, err := puffer.Broker.ListenTopic(config.APIVersion, config.Production.Channel)
+	/// Handle input messages from nsq channels
+	channel, err := puffer.Broker.ListenTopic(config.Production.InitialTopic, config.APIVersion)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -37,11 +39,15 @@ func main() {
 		json.Unmarshal(event, &details)
 		log.Println(fmt.Sprintf("Received message: '%v'", details.Message))
 
+		if details.APIVersion != config.APIVersion {
+			continue
+		}
+
 		switch details.Message {
 		case "Items by name ready":
-			puffer.Socket.WriteToClient(details.ClientID, details.Message, details.Data)
+			puffer.Socket.WriteToClient(details.ClientID, details.Message, details.APIVersion, details.Data)
 		case "Items by name not found":
-			puffer.Socket.WriteToClient(details.ClientID, details.Message, details.Data)
+			puffer.Socket.WriteToClient(details.ClientID, details.Message, details.APIVersion, details.Data)
 		}
 	}
 }
