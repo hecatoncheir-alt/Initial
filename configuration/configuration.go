@@ -13,6 +13,7 @@ type Configuration struct {
 	Production struct {
 		InitialTopic string
 		SprootTopic  string
+		LogunaTopic  string
 
 		Broker struct {
 			Host string
@@ -34,6 +35,7 @@ type Configuration struct {
 	Development struct {
 		InitialTopic string
 		SprootTopic  string
+		LogunaTopic  string
 
 		Broker struct {
 			Host string
@@ -76,6 +78,13 @@ func GetConfiguration() (Configuration, error) {
 		configuration.Production.SprootTopic = productionSprootTopic
 	}
 
+	productionLogunaTopic := os.Getenv("Production-Loguna-Topic")
+	if productionLogunaTopic == "" {
+		configuration.Production.LogunaTopic = "Loguna"
+	} else {
+		configuration.Production.LogunaTopic = productionLogunaTopic
+	}
+
 	developmentInitialTopic := os.Getenv("Development-Initial-Topic")
 	if developmentInitialTopic == "" {
 		configuration.Development.InitialTopic = "DevInitial"
@@ -88,6 +97,13 @@ func GetConfiguration() (Configuration, error) {
 		configuration.Development.SprootTopic = "DevSproot"
 	} else {
 		configuration.Development.SprootTopic = developmentSprootTopic
+	}
+
+	developmentLogunaTopic := os.Getenv("Development-Loguna-Topic")
+	if developmentLogunaTopic == "" {
+		configuration.Development.LogunaTopic = "DevLoguna"
+	} else {
+		configuration.Development.LogunaTopic = developmentLogunaTopic
 	}
 
 	productionBrokerHostFromEnvironment := os.Getenv("Production-Broker-Host")
