@@ -19,7 +19,7 @@ var (
 func SetUpServer() {
 	server := New("v1")
 	goroutines.Done()
-	config, _ := configuration.GetConfiguration()
+	config := configuration.New()
 	server.SetUp("", config.Development.HTTPServer.Host, config.Development.HTTPServer.Port)
 }
 
@@ -28,7 +28,7 @@ func TestHttpServerCanSendVersionOfAPI(test *testing.T) {
 	go once.Do(SetUpServer)
 	goroutines.Wait()
 
-	config, _ := configuration.GetConfiguration()
+	config := configuration.New()
 
 	iri := fmt.Sprintf("http://%v:%v/api/version", config.Development.HTTPServer.Host, config.Development.HTTPServer.Port)
 	respose, err := http.Get(iri)

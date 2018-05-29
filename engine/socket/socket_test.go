@@ -18,7 +18,7 @@ var (
 func SetUpSocketServer() {
 	testServer := New("v1.0", nil, "")
 	goroutines.Done()
-	config, _ := configuration.GetConfiguration()
+	config := configuration.New()
 	testServer.SetUp(config.Development.SocketServer.Host, config.Development.SocketServer.Port)
 	defer testServer.HTTPServer.Close()
 }
@@ -28,7 +28,7 @@ func TestSocketServerCanHandleEvents(test *testing.T) {
 	go once.Do(SetUpSocketServer)
 	goroutines.Wait()
 
-	config, _ := configuration.GetConfiguration()
+	config := configuration.New()
 
 	iriOfWebSocketServer := fmt.Sprintf("ws://%v:%v", config.Development.SocketServer.Host, config.Development.SocketServer.Port)
 	iriOfHttpServer := fmt.Sprintf("http://%v:%v", config.Development.SocketServer.Host, config.Development.SocketServer.Port)

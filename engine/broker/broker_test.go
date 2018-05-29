@@ -11,12 +11,9 @@ import (
 func TestBrokerCanSendMessageToNSQ(test *testing.T) {
 	bro := New()
 
-	config, err := configuration.GetConfiguration()
-	if err != nil {
-		log.Println(err)
-	}
+	config := configuration.New()
 
-	err = bro.Connect(config.Development.Broker.Host, config.Development.Broker.Port)
+	err := bro.Connect(config.Development.Broker.Host, config.Development.Broker.Port)
 	if err != nil {
 		log.Println("Need started NSQ")
 		log.Println(err)
