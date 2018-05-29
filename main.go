@@ -11,14 +11,11 @@ import (
 )
 
 func main() {
-	config, err := configuration.GetConfiguration()
-	if err != nil {
-		log.Fatal(err)
-	}
+	config := configuration.New()
 
-	puffer := engine.New(config.APIVersion)
+	puffer := engine.New(config.APIVersion, config.ServiceName, config.Production.LogunaTopic)
 
-	err = puffer.SetUpBroker(config.Production.Broker.Host, config.Production.Broker.Port)
+	err := puffer.SetUpBroker(config.Production.Broker.Host, config.Production.Broker.Port)
 	if err != nil {
 		log.Fatal(err)
 	}

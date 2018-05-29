@@ -6,10 +6,7 @@ import (
 )
 
 func TestGetConfiguration(test *testing.T) {
-	defaultValues, err := GetConfiguration()
-	if err != nil {
-		test.Error(err)
-	}
+	defaultValues := New()
 
 	if defaultValues.Production.Broker.Host != "192.168.99.100" {
 		test.Fail()
@@ -17,10 +14,7 @@ func TestGetConfiguration(test *testing.T) {
 
 	os.Setenv("Production-Broker-Host", "localhost")
 
-	notDefaultValues, err := GetConfiguration()
-	if err != nil {
-		test.Error(err)
-	}
+	notDefaultValues := New()
 
 	if notDefaultValues.Production.Broker.Host != "localhost" {
 		test.Fail()

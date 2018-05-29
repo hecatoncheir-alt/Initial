@@ -8,7 +8,8 @@ import (
 )
 
 type Configuration struct {
-	APIVersion string
+	APIVersion,
+	ServiceName string
 
 	Production struct {
 		InitialTopic string
@@ -54,14 +55,21 @@ type Configuration struct {
 	}
 }
 
-func GetConfiguration() (Configuration, error) {
+func New() *Configuration {
 	configuration := Configuration{}
 
-	apiVersion := os.Getenv("Api-Version")
+	apiVersion := os.Getenv("API-Version")
 	if apiVersion == "" {
 		configuration.APIVersion = "1.0.0"
 	} else {
 		configuration.APIVersion = apiVersion
+	}
+
+	serviceName := os.Getenv("Service-Name")
+	if serviceName == "" {
+		configuration.ServiceName = "Initial"
+	} else {
+		configuration.ServiceName = serviceName
 	}
 
 	productionInitialTopic := os.Getenv("Production-Initial-Topic")
@@ -231,5 +239,5 @@ func GetConfiguration() (Configuration, error) {
 		configuration.Development.SocketServer.Port = port
 	}
 
-	return configuration, nil
+	return &configuration
 }

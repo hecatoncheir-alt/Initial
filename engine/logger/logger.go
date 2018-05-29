@@ -5,7 +5,7 @@ import (
 
 	"errors"
 
-	"github.com/hecatoncheir/Hecatoncheir/broker"
+	"github.com/hecatoncheir/Initial/engine/broker"
 )
 
 type LogData struct {
@@ -23,7 +23,7 @@ type LogWriter struct {
 	bro         *broker.Broker
 }
 
-func New(apiVersion, topicForWriteLog string, broker *broker.Broker) *LogWriter {
+func New(apiVersion, serviceName, topicForWriteLog string, broker *broker.Broker) *LogWriter {
 	logger := LogWriter{LoggerTopic: topicForWriteLog, bro: broker}
 	return &logger
 }
@@ -38,7 +38,7 @@ func (logWriter *LogWriter) Write(data LogData) error {
 	}
 
 	data.APIVersion = logWriter.APIVersion
-	data.Service = "Hecatoncheir"
+	data.Service = "Initial"
 
 	err := logWriter.bro.WriteToTopic(logWriter.LoggerTopic, data)
 	if err != nil {

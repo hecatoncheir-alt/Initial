@@ -2,6 +2,7 @@ package engine
 
 import (
 	"github.com/hecatoncheir/Initial/engine/broker"
+	"github.com/hecatoncheir/Initial/engine/logger"
 	"github.com/hecatoncheir/Initial/engine/socket"
 
 	httpServer "github.com/hecatoncheir/Initial/engine/http"
@@ -9,15 +10,18 @@ import (
 
 // Engine is a main object of engine pkg
 type Engine struct {
-	APIVersion string
-	Broker     *broker.Broker
-	Socket     *socket.Server
-	HTTP       *httpServer.Server
+	APIVersion  string
+	ServiceName string
+	LogsChannel string
+	Broker      *broker.Broker
+	Socket      *socket.Server
+	HTTP        *httpServer.Server
+	Logger      *logger.LogWriter
 }
 
 // New is a constructor for Engine
-func New(apiVersion string) *Engine {
-	engine := Engine{APIVersion: apiVersion}
+func New(apiVersion, serviceName, logsChannel string) *Engine {
+	engine := Engine{APIVersion: apiVersion, ServiceName: serviceName}
 	return &engine
 }
 
@@ -30,6 +34,9 @@ func (engine *Engine) SetUpBroker(host string, port int) error {
 	if err != nil {
 		return err
 	}
+
+	engine.Logger = logger.New(
+		engine.APIVersion, engine.ServiceName, engine.LogsChannel, bro)
 
 	return nil
 }

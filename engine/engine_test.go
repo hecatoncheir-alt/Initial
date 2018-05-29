@@ -7,13 +7,11 @@ import (
 )
 
 func TestIntegrationEngineCanBeSetUp(test *testing.T) {
-	config, err := configuration.GetConfiguration()
-	if err != nil {
-		test.Error(err)
-	}
+	config := configuration.New()
 
-	engine := New(config.APIVersion)
-	err = engine.SetUpBroker(config.Development.Broker.Host, config.Development.Broker.Port)
+	engine := New(config.APIVersion, config.ServiceName, config.Development.LogunaTopic)
+
+	err := engine.SetUpBroker(config.Development.Broker.Host, config.Development.Broker.Port)
 	if err != nil {
 		test.Error(err)
 	}
