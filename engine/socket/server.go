@@ -4,28 +4,28 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"sync"
 
 	"github.com/gorilla/websocket"
 	"github.com/hecatoncheir/Initial/engine/broker"
+	"github.com/hecatoncheir/Initial/engine/logger"
 )
 
 // Server is an object of socket server structure
 type Server struct {
 	APIVersion, SprootChannel string
 	HTTPServer                *http.Server
+	Logger                    *logger.LogWriter
 	Clients                   map[string]*Client
 
 	Broker *broker.Broker
-	Log    *log.Logger
 
 	clientsMutex    sync.Mutex
 	headersUpgrader websocket.Upgrader
 }
 
 // New is constructor for socket server
-func New(apiVersion string, broker *broker.Broker, sprootChannel string) *Server {
+func New(apiVersion, sprootChannel string, broker *broker.Broker, logger *logger.LogWriter) *Server {
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -37,9 +37,9 @@ func New(apiVersion string, broker *broker.Broker, sprootChannel string) *Server
 		SprootChannel:   sprootChannel,
 		Clients:         make(map[string]*Client),
 		headersUpgrader: upgrader,
+		Logger:          logger,
 		Broker:          broker}
 
-	socketServer.Log = log.New(os.Stdout, "SocketServer: ", 3)
 	return &socketServer
 }
 
@@ -47,7 +47,10 @@ func New(apiVersion string, broker *broker.Broker, sprootChannel string) *Server
 func (server *Server) SetUp(host string, port int) error {
 	server.HTTPServer = &http.Server{Addr: fmt.Sprintf("%v:%v", host, port)}
 	server.HTTPServer.Handler = http.HandlerFunc(server.ClientConnectedHandler)
-	server.Log.Printf("Socket server listen on %v, port:%v \n", host, port)
+
+	message := fmt.Sprintf("Socket server listen on %v, port:%v \n", host, port)
+	server.Logger.Write(logger.LogData{Message: message, Level: "info"})
+
 	server.HTTPServer.ListenAndServe()
 	return nil
 }
@@ -66,7 +69,8 @@ func (server *Server) ClientConnectedHandler(response http.ResponseWriter, reque
 	server.Clients[client.ID] = client
 	server.clientsMutex.Unlock()
 
-	server.Log.Printf("Client: %v connected. Connected clients: %v", client.ID, len(server.Clients))
+	message := fmt.Sprintf("Client: %v connected. Connected clients: %v", client.ID, len(server.Clients))
+	server.Logger.Write(logger.LogData{Message: message, Level: "info"})
 
 	go server.listenConnectedClient(client)
 }
@@ -74,7 +78,8 @@ func (server *Server) ClientConnectedHandler(response http.ResponseWriter, reque
 // listenConnectedClient need for receive and broadcast client messages
 func (server *Server) listenConnectedClient(client *Client) {
 	for event := range client.Channel {
-		server.Log.Printf("Received event: %v from connected client: %v", event, client.ID)
+		message := fmt.Sprintf("Received event: %v from connected client: %v", event, client.ID)
+		server.Logger.Write(logger.LogData{Message: message, Level: "info"})
 
 		switch event.Message {
 		case "Need api version":
@@ -101,6 +106,10 @@ func (server *Server) WriteToAll(message string, data string) {
 func (server *Server) WriteToClient(clientID, message, APIVersion, data string) {
 	for _, connection := range server.Clients {
 		if connection.ID == clientID {
+
+			message := fmt.Sprintf("Writing message: %v to connected client: %v", message, clientID)
+			server.Logger.Write(logger.LogData{Message: message, Level: "info"})
+
 			go connection.Write(message, server.APIVersion, data)
 			break
 		}

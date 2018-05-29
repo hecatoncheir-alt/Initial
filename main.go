@@ -23,7 +23,7 @@ func main() {
 	go puffer.SetUpSocketServer(config.Production.SocketServer.Host, config.Production.SocketServer.Port, puffer.Broker, config.Production.SprootTopic)
 
 	/// Send messages to other nsq channels
-	go puffer.SetUpHttpServer(config.Production.HTTPServer.StaticFilesDirectory, config.Production.HTTPServer.Host, config.Production.HTTPServer.Port)
+	go puffer.SetUpHTTPServer(config.Production.HTTPServer.StaticFilesDirectory, config.Production.HTTPServer.Host, config.Production.HTTPServer.Port)
 
 	/// Handle input messages from nsq channels
 	channel, err := puffer.Broker.ListenTopic(config.Production.InitialTopic, config.APIVersion)

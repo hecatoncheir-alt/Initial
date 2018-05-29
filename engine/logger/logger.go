@@ -20,11 +20,12 @@ type Writer interface {
 type LogWriter struct {
 	APIVersion  string
 	LoggerTopic string
+	ServiceName string
 	bro         *broker.Broker
 }
 
 func New(apiVersion, serviceName, topicForWriteLog string, broker *broker.Broker) *LogWriter {
-	logger := LogWriter{LoggerTopic: topicForWriteLog, bro: broker}
+	logger := LogWriter{LoggerTopic: topicForWriteLog, bro: broker, ServiceName: serviceName}
 	return &logger
 }
 
@@ -38,7 +39,7 @@ func (logWriter *LogWriter) Write(data LogData) error {
 	}
 
 	data.APIVersion = logWriter.APIVersion
-	data.Service = "Initial"
+	data.Service = logWriter.ServiceName
 
 	err := logWriter.bro.WriteToTopic(logWriter.LoggerTopic, data)
 	if err != nil {

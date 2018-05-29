@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"fmt"
+
 	"github.com/hecatoncheir/Initial/engine/broker"
 	"github.com/hecatoncheir/Initial/engine/logger"
 	"github.com/hecatoncheir/Initial/engine/socket"
@@ -41,26 +43,43 @@ func (engine *Engine) SetUpBroker(host string, port int) error {
 	return nil
 }
 
-func (engine *Engine) SetUpHttpServer(staticFilesDirectory, host string, port int) error {
+func (engine *Engine) SetUpHTTPServer(staticFilesDirectory, host string, port int) error {
 	httpServ := httpServer.New(engine.APIVersion)
 	engine.HTTP = httpServ
 
 	err := httpServ.SetUp(staticFilesDirectory, host, port)
 	if err != nil {
+		message := fmt.Sprintf("Http server can't be started: %v on port: %v", host, port)
+		eventData := logger.LogData{
+			Message: message,
+			Level:   "warning"}
+		go engine.Logger.Write(eventData)
 		return err
 	}
+
+	message := fmt.Sprintf("Http server started: %v on port: %v", host, port)
+	eventData := logger.LogData{Message: message, Level: "info"}
+	go engine.Logger.Write(eventData)
 
 	return nil
 }
 
 func (engine *Engine) SetUpSocketServer(host string, port int, broker *broker.Broker, sprootChaneel string) error {
-	socketServer := socket.New(engine.APIVersion, broker, sprootChaneel)
+	socketServer := socket.New(engine.APIVersion, sprootChaneel, broker, engine.Logger)
 	engine.Socket = socketServer
 
 	err := socketServer.SetUp(host, port)
 	if err != nil {
+		message := fmt.Sprintf("Socket server can't be started: %v on port: %v", host, port)
+		eventData := logger.LogData{Message: message, Level: "warning"}
+		go engine.Logger.Write(eventData)
+
 		return err
 	}
+
+	message := fmt.Sprintf("Socket server started: %v on port: %v", host, port)
+	eventData := logger.LogData{Message: message, Level: "info"}
+	go engine.Logger.Write(eventData)
 
 	return nil
 }
