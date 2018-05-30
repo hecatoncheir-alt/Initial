@@ -44,7 +44,7 @@ func (engine *Engine) SetUpBroker(host string, port int) error {
 }
 
 func (engine *Engine) SetUpHTTPServer(staticFilesDirectory, host string, port int) error {
-	httpServ := httpServer.New(engine.APIVersion)
+	httpServ := httpServer.New(engine.APIVersion, engine.Logger)
 	engine.HTTP = httpServ
 
 	err := httpServ.SetUp(staticFilesDirectory, host, port)

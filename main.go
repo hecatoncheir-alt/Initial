@@ -27,12 +27,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log := logger.New(
-		config.APIVersion,
-		config.ServiceName,
-		config.Production.LogunaTopic,
-		puffer.Broker)
-
 	go puffer.SetUpSocketServer(
 		config.Production.SocketServer.Host,
 		config.Production.SocketServer.Port,
@@ -48,14 +42,19 @@ func main() {
 	channel, err := puffer.Broker.ListenTopic(config.Production.InitialTopic, config.APIVersion)
 	if err != nil {
 		log.Fatal(err)
+
+		logMessage := fmt.Sprintf(
+			"Error on subscribe on %v: '%v'",
+			config.Production.InitialTopic, err)
+		puffer.Logger.Write(logger.LogData{Message: logMessage, Level: "warning"})
 	}
 
 	for event := range channel {
 		details := socket.EventData{}
 		json.Unmarshal(event, &details)
 
-		logMessage:= fmt.Sprintf("Received message: '%v'", details.Message)
-		log.Write(Message: logMessage, level: "info")
+		logMessage := fmt.Sprintf("Received message: '%v'", details.Message)
+		puffer.Logger.Write(logger.LogData{Message: logMessage, Level: "info"})
 
 		if details.APIVersion != config.APIVersion {
 			continue

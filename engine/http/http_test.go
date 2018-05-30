@@ -17,7 +17,7 @@ var (
 )
 
 func SetUpServer() {
-	server := New("v1")
+	server := New("v1", nil)
 	goroutines.Done()
 	config := configuration.New()
 	server.SetUp("", config.Development.HTTPServer.Host, config.Development.HTTPServer.Port)
