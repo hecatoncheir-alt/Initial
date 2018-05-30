@@ -3,10 +3,9 @@ package http
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
-	"os"
 
+	"github.com/hecatoncheir/Initial/engine/logger"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -14,15 +13,15 @@ type Server struct {
 	APIVersion string
 	HTTPServer *http.Server
 	router     *httprouter.Router
-	Log        *log.Logger
+	Logger     *logger.LogWriter
 }
 
-func New(apiVersion string) *Server {
+func New(apiVersion string, logger *logger.LogWriter) *Server {
 	server := Server{
 		APIVersion: apiVersion,
+		Logger:     logger,
 		router:     httprouter.New()}
 
-	server.Log = log.New(os.Stdout, "HttpServer: ", 3)
 	return &server
 }
 
@@ -31,7 +30,9 @@ func (server *Server) SetUp(staticFilesDirectory, host string, port int) error {
 	server.router.GET("/api/version", server.apiVersionCheckHandler)
 
 	server.HTTPServer = &http.Server{Addr: fmt.Sprintf("%v:%v", host, port)}
-	server.Log.Printf("Http server listen on %v, port:%v \n", host, port)
+
+	eventMessage := fmt.Sprintf("Http server listen on %v, port:%v \n", host, port)
+	server.Logger.Write(logger.LogData{Message: eventMessage, Level: "info"})
 
 	server.HTTPServer.Handler = server.router
 	server.HTTPServer.ListenAndServe()

@@ -7,23 +7,42 @@ import (
 
 	"github.com/hecatoncheir/Initial/configuration"
 	"github.com/hecatoncheir/Initial/engine"
+	"github.com/hecatoncheir/Initial/engine/logger"
 	"github.com/hecatoncheir/Initial/engine/socket"
 )
 
 func main() {
 	config := configuration.New()
 
-	puffer := engine.New(config.APIVersion, config.ServiceName, config.Production.LogunaTopic)
+	puffer := engine.New(
+		config.APIVersion,
+		config.ServiceName,
+		config.Production.LogunaTopic)
 
-	err := puffer.SetUpBroker(config.Production.Broker.Host, config.Production.Broker.Port)
+	err := puffer.SetUpBroker(
+		config.Production.Broker.Host,
+		config.Production.Broker.Port)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	go puffer.SetUpSocketServer(config.Production.SocketServer.Host, config.Production.SocketServer.Port, puffer.Broker, config.Production.SprootTopic)
+	log := logger.New(
+		config.APIVersion,
+		config.ServiceName,
+		config.Production.LogunaTopic,
+		puffer.Broker)
+
+	go puffer.SetUpSocketServer(
+		config.Production.SocketServer.Host,
+		config.Production.SocketServer.Port,
+		puffer.Broker, config.Production.SprootTopic)
 
 	/// Send messages to other nsq channels
-	go puffer.SetUpHTTPServer(config.Production.HTTPServer.StaticFilesDirectory, config.Production.HTTPServer.Host, config.Production.HTTPServer.Port)
+	go puffer.SetUpHTTPServer(
+		config.Production.HTTPServer.StaticFilesDirectory,
+		config.Production.HTTPServer.Host,
+		config.Production.HTTPServer.Port)
 
 	/// Handle input messages from nsq channels
 	channel, err := puffer.Broker.ListenTopic(config.Production.InitialTopic, config.APIVersion)
@@ -34,7 +53,9 @@ func main() {
 	for event := range channel {
 		details := socket.EventData{}
 		json.Unmarshal(event, &details)
-		log.Println(fmt.Sprintf("Received message: '%v'", details.Message))
+
+		logMessage:= fmt.Sprintf("Received message: '%v'", details.Message)
+		log.Write(Message: logMessage, level: "info")
 
 		if details.APIVersion != config.APIVersion {
 			continue
