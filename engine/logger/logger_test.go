@@ -13,7 +13,7 @@ import (
 func TestLoggerCanWriteLogData(test *testing.T) {
 	conf := configuration.New()
 
-	bro := broker.New()
+	bro := broker.New(conf.APIVersion, conf.ServiceName)
 	bro.Connect(conf.Development.Broker.Host, conf.Development.Broker.Port)
 
 	logWriter := New(conf.APIVersion, conf.ServiceName, conf.Development.LogunaTopic, bro)

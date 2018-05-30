@@ -9,7 +9,7 @@ import (
 )
 
 func TestBrokerCanSendMessageToNSQ(test *testing.T) {
-	bro := New()
+	bro := New("1.0.0", "Test service name")
 
 	config := configuration.New()
 
@@ -19,7 +19,9 @@ func TestBrokerCanSendMessageToNSQ(test *testing.T) {
 		log.Println(err)
 	}
 
-	item := map[string]string{"Name": "test item"}
+	// item := map[string]string{"Name": "test item"}
+
+	item := EventData{Message: "Name", Data: "test item"}
 
 	items, err := bro.ListenTopic(config.Development.InitialTopic, config.APIVersion)
 	if err != nil {

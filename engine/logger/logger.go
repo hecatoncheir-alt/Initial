@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"encoding/json"
 	"time"
 
 	"errors"
@@ -9,8 +10,8 @@ import (
 )
 
 type LogData struct {
-	APIVersion, Message, Service, Level string
-	Time                                time.Time
+	Message, Level string
+	Time           time.Time
 }
 
 type Writer interface {
@@ -38,10 +39,18 @@ func (logWriter *LogWriter) Write(data LogData) error {
 		return ErrLogDataWithoutTime
 	}
 
-	data.APIVersion = logWriter.APIVersion
-	data.Service = logWriter.ServiceName
+	item := map[string]interface{}{
+		"Service": data.Level, "Time": data.Time}
 
-	err := logWriter.bro.WriteToTopic(logWriter.LoggerTopic, data)
+	eventData, err := json.Marshal(item)
+	if err != nil {
+		return err
+	}
+
+	event := broker.EventData{
+		Message: data.Message, Data: string(eventData)}
+
+	err = logWriter.bro.WriteToTopic(logWriter.LoggerTopic, event)
 	if err != nil {
 		return err
 	}

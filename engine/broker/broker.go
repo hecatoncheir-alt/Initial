@@ -10,9 +10,19 @@ import (
 	nsq "github.com/bitly/go-nsq"
 )
 
+// EventData is a struct of event for send or receive from broker
+type EventData struct {
+	Message     string
+	Data        string
+	APIVersion  string
+	ServiceName string
+}
+
 // New constructor for Broker
-func New() *Broker {
+func New(apiVersion, serviceName string) *Broker {
 	broker := Broker{}
+	broker.APIVersion = apiVersion
+	broker.ServiceName = serviceName
 	broker.configuration = nsq.NewConfig()
 	// broker.сonfiguration.MaxInFlight = 6
 	// broker.сonfiguration.MsgTimeout = time.Duration(time.Second * 6)
@@ -23,6 +33,8 @@ func New() *Broker {
 // Broker is a object of message stream
 type Broker struct {
 	IP            string
+	APIVersion    string
+	ServiceName   string
 	Port          int
 	configuration *nsq.Config
 	Producer      *nsq.Producer
@@ -57,7 +69,9 @@ func (broker *Broker) Connect(host string, port int) error {
 }
 
 // WriteToTopic method for publish message to topic
-func (broker *Broker) WriteToTopic(topic string, message interface{}) error {
+func (broker *Broker) WriteToTopic(topic string, message EventData) error {
+	message.APIVersion = broker.APIVersion
+	message.ServiceName = broker.ServiceName
 	event, err := json.Marshal(message)
 	if err != nil {
 		return err
