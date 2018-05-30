@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/hecatoncheir/Initial/configuration"
 	"github.com/hecatoncheir/Initial/engine"
+	"github.com/hecatoncheir/Initial/engine/broker"
 	"github.com/hecatoncheir/Initial/engine/logger"
 	"github.com/hecatoncheir/Initial/engine/socket"
 )
@@ -38,6 +40,9 @@ func main() {
 		config.Production.HTTPServer.Host,
 		config.Production.HTTPServer.Port)
 
+	go PeriodicSendParseProductsOfCategoriesOfCompanyEvent(
+		time.Hour*24, puffer.Broker, config.Production.SprootTopic)
+
 	/// Handle input messages from nsq channels
 	channel, err := puffer.Broker.ListenTopic(config.Production.InitialTopic, config.APIVersion)
 	if err != nil {
@@ -67,4 +72,16 @@ func main() {
 			puffer.Socket.WriteToClient(details.ClientID, details.Message, details.APIVersion, details.Data)
 		}
 	}
+}
+
+func PeriodicSendParseProductsOfCategoriesOfCompanyEvent(
+	duration time.Duration,
+	bro *broker.Broker,
+	topicWithDataForParser string) {
+
+	time.Sleep(duration)
+	event := broker.EventData{Message: "Products of categories of companies must be parsed"}
+	bro.WriteToTopic(topicWithDataForParser, event)
+
+	go PeriodicSendParseProductsOfCategoriesOfCompanyEvent(duration, bro)
 }
