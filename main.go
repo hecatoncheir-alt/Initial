@@ -6,11 +6,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/hecatoncheir/Initial/configuration"
+	"github.com/hecatoncheir/Broker"
+	"github.com/hecatoncheir/Configuration"
 	"github.com/hecatoncheir/Initial/engine"
-	"github.com/hecatoncheir/Initial/engine/broker"
-	"github.com/hecatoncheir/Initial/engine/logger"
 	"github.com/hecatoncheir/Initial/engine/socket"
+	"github.com/hecatoncheir/Logger"
 )
 
 func main() {
@@ -80,8 +80,9 @@ func PeriodicSendParseProductsOfCategoriesOfCompanyEvent(
 	topicWithDataForParser string) {
 
 	time.Sleep(duration)
-	event := broker.EventData{Message: "Products of categories of companies must be parsed"}
+	event := broker.EventData{
+		Message: "Products of categories of companies must be parsed"}
 	bro.WriteToTopic(topicWithDataForParser, event)
 
-	go PeriodicSendParseProductsOfCategoriesOfCompanyEvent(duration, bro)
+	go PeriodicSendParseProductsOfCategoriesOfCompanyEvent(duration, bro, topicWithDataForParser)
 }

@@ -7,8 +7,8 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
-	"github.com/hecatoncheir/Initial/engine/broker"
-	"github.com/hecatoncheir/Initial/engine/logger"
+	"github.com/hecatoncheir/Broker"
+	"github.com/hecatoncheir/Logger"
 )
 
 // Server is an object of socket server structure
@@ -86,7 +86,8 @@ func (server *Server) listenConnectedClient(client *Client) {
 			server.Clients[event.ClientID].Write("Version of API", server.APIVersion, "")
 
 		case "Need items by name":
-			server.Broker.WriteToTopic(server.SprootChannel, event)
+			eventData := broker.EventData{Message: event.Message, Data: event.Data}
+			server.Broker.WriteToTopic(server.SprootChannel, eventData)
 		}
 	}
 

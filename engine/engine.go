@@ -3,8 +3,9 @@ package engine
 import (
 	"fmt"
 
-	"github.com/hecatoncheir/Initial/engine/broker"
-	"github.com/hecatoncheir/Initial/engine/logger"
+	"github.com/hecatoncheir/Broker"
+	"github.com/hecatoncheir/Logger"
+
 	"github.com/hecatoncheir/Initial/engine/socket"
 
 	httpServer "github.com/hecatoncheir/Initial/engine/http"
@@ -29,7 +30,7 @@ func New(apiVersion, serviceName, logsChannel string) *Engine {
 
 // SetUpBroker for make connect to broker and prepare client for requests
 func (engine *Engine) SetUpBroker(host string, port int) error {
-	bro := broker.New()
+	bro := broker.New(engine.APIVersion, engine.ServiceName)
 	engine.Broker = bro
 
 	err := bro.Connect(host, port)

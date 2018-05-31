@@ -3,7 +3,7 @@ package engine
 import (
 	"testing"
 
-	"github.com/hecatoncheir/Initial/configuration"
+	"github.com/hecatoncheir/Configuration"
 )
 
 func TestIntegrationEngineCanBeSetUp(test *testing.T) {

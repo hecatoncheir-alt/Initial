@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hecatoncheir/Initial/engine/logger"
+	"github.com/hecatoncheir/Logger"
 	"github.com/julienschmidt/httprouter"
 )
 

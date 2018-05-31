@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/hecatoncheir/Initial/configuration"
+	"github.com/hecatoncheir/Configuration"
 )
 
 var (

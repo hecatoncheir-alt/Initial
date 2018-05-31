@@ -6,7 +6,7 @@ import (
 
 	"fmt"
 
-	"github.com/hecatoncheir/Initial/configuration"
+	"github.com/hecatoncheir/Configuration"
 	"golang.org/x/net/websocket"
 )
 
