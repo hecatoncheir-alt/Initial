@@ -29,6 +29,9 @@ func TestSocketServerCanHandleEvents(test *testing.T) {
 	goroutines.Wait()
 
 	config := configuration.New()
+	if config.ServiceName == "" {
+		config.ServiceName = "Initial"
+	}
 
 	iriOfWebSocketServer := fmt.Sprintf("ws://%v:%v", config.Development.SocketServer.Host, config.Development.SocketServer.Port)
 	iriOfHTTPServer := fmt.Sprintf("http://%v:%v", config.Development.SocketServer.Host, config.Development.SocketServer.Port)

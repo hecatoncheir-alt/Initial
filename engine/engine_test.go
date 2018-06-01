@@ -8,6 +8,9 @@ import (
 
 func TestIntegrationEngineCanBeSetUp(test *testing.T) {
 	config := configuration.New()
+	if config.ServiceName == "" {
+		config.ServiceName = "Initial"
+	}
 
 	engine := New(config.APIVersion, config.ServiceName, config.Development.LogunaTopic)
 
