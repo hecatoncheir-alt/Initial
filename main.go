@@ -15,7 +15,9 @@ import (
 
 func main() {
 	config := configuration.New()
-
+	if config.ServiceName == "" {
+		config.ServiceName = "Initial"
+	}
 	puffer := engine.New(
 		config.APIVersion,
 		config.ServiceName,
