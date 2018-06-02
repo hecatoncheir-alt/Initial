@@ -1,7 +1,9 @@
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/hecatoncheir/Broker"
 	"github.com/hecatoncheir/Logger"
@@ -24,7 +26,7 @@ type Engine struct {
 
 // New is a constructor for Engine
 func New(apiVersion, serviceName, logsChannel string) *Engine {
-	engine := Engine{APIVersion: apiVersion, ServiceName: serviceName}
+	engine := Engine{APIVersion: apiVersion, ServiceName: serviceName, LogsChannel: logsChannel}
 	return &engine
 }
 
@@ -83,4 +85,37 @@ func (engine *Engine) SetUpSocketServer(host string, port int, broker *broker.Br
 	go engine.Logger.Write(eventData)
 
 	return nil
+}
+
+func (engine *Engine) SubscribeOnEvents(inputTopic string) {
+
+	/// Handle input messages from nsq channels
+	channel, err := engine.Broker.ListenTopic(inputTopic, engine.APIVersion)
+	if err != nil {
+		log.Fatal(err)
+
+		logMessage := fmt.Sprintf(
+			"Error on subscribe on %v: '%v'",
+			inputTopic, err)
+		engine.Logger.Write(logger.LogData{Message: logMessage, Level: "warning"})
+	}
+
+	for event := range channel {
+		details := broker.EventData{}
+		json.Unmarshal(event, &details)
+
+		logMessage := fmt.Sprintf("Received message: '%v'", details.Message)
+		engine.Logger.Write(logger.LogData{Message: logMessage, Level: "info"})
+
+		if details.APIVersion != engine.APIVersion {
+			continue
+		}
+
+		switch details.Message {
+		case "Items by name ready":
+			engine.Socket.WriteToClient(details.ClientID, details.Message, details.APIVersion, details.Data)
+		case "Items by name not found":
+			engine.Socket.WriteToClient(details.ClientID, details.Message, details.APIVersion, details.Data)
+		}
+	}
 }

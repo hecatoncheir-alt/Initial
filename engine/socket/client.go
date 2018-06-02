@@ -8,20 +8,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/hecatoncheir/Broker"
 )
-
-// EventData is a struct of event for receive from socket server
-type EventData struct {
-	Message    string
-	Data       string
-	APIVersion string
-	ClientID   string
-}
 
 // Client is a structure of connected client object
 type Client struct {
 	ID         string
-	Channel    chan EventData
+	Channel    chan broker.EventData
 	Connection *websocket.Conn
 	wmu        sync.Mutex
 	Log        *log.Logger
@@ -33,14 +26,14 @@ func NewConnectedClient(clientConnection *websocket.Conn) *Client {
 	client := Client{
 		ID:         clientID.String(),
 		Connection: clientConnection,
-		Channel:    make(chan EventData)}
+		Channel:    make(chan broker.EventData)}
 
 	client.Log = log.New(os.Stdout, "Connected client: ", 3)
 
 	go func() {
 		for {
 
-			inputMessage := EventData{}
+			inputMessage := broker.EventData{}
 			_, messageBytes, err := clientConnection.ReadMessage()
 
 			if err != nil {
@@ -63,7 +56,7 @@ func NewConnectedClient(clientConnection *websocket.Conn) *Client {
 // Write need for send event to client
 func (client *Client) Write(message, APIVersion, data string) {
 
-	event := EventData{
+	event := broker.EventData{
 		ClientID:   client.ID,
 		Message:    message,
 		APIVersion: APIVersion,

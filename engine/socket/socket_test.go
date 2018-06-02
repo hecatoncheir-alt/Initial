@@ -6,6 +6,7 @@ import (
 
 	"fmt"
 
+	"github.com/hecatoncheir/Broker"
 	"github.com/hecatoncheir/Configuration"
 	"golang.org/x/net/websocket"
 )
@@ -33,22 +34,24 @@ func TestSocketServerCanHandleEvents(test *testing.T) {
 		config.ServiceName = "Initial"
 	}
 
-	iriOfWebSocketServer := fmt.Sprintf("ws://%v:%v", config.Development.SocketServer.Host, config.Development.SocketServer.Port)
-	iriOfHTTPServer := fmt.Sprintf("http://%v:%v", config.Development.SocketServer.Host, config.Development.SocketServer.Port)
+	iriOfWebSocketServer := fmt.Sprintf("ws://%v:%v", config.Development.SocketServer.Host,
+		config.Development.SocketServer.Port)
+	iriOfHTTPServer := fmt.Sprintf("http://%v:%v", config.Development.SocketServer.Host,
+		config.Development.SocketServer.Port)
 
 	socketConnection, err := websocket.Dial(iriOfWebSocketServer, "", iriOfHTTPServer)
 	if err != nil {
 		test.Error(err)
 	}
 
-	inputMessage := make(chan EventData)
+	inputMessage := make(chan broker.EventData)
 
 	go func() {
 		defer socketConnection.Close()
 		defer close(inputMessage)
 
 		for {
-			messageFromServer := EventData{}
+			messageFromServer := broker.EventData{}
 			err = websocket.JSON.Receive(socketConnection, &messageFromServer)
 			if err != nil {
 				test.Error(err)
@@ -59,7 +62,7 @@ func TestSocketServerCanHandleEvents(test *testing.T) {
 		}
 	}()
 
-	messageToServer := EventData{Message: "Need api version"}
+	messageToServer := broker.EventData{Message: "Need api version"}
 	err = websocket.JSON.Send(socketConnection, messageToServer)
 
 	if err != nil {
