@@ -78,8 +78,10 @@ func (server *Server) ClientConnectedHandler(response http.ResponseWriter, reque
 // listenConnectedClient need for receive and broadcast client messages
 func (server *Server) listenConnectedClient(client *Client) {
 	for event := range client.Channel {
-		message := fmt.Sprintf("Received event: %v from connected client: %v", event, client.ID)
-		server.Logger.Write(logger.LogData{Message: message, Level: "info"})
+		event.ClientID = client.ID
+
+		logMessage := fmt.Sprintf("Received event: %v from connected client: %v", event, client.ID)
+		go server.Logger.Write(logger.LogData{Message: logMessage, Level: "info"})
 
 		switch event.Message {
 		case "Need api version":

@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 
@@ -101,21 +100,15 @@ func (engine *Engine) SubscribeOnEvents(inputTopic string) {
 	}
 
 	for event := range channel {
-		details := broker.EventData{}
-		json.Unmarshal(event, &details)
 
-		logMessage := fmt.Sprintf("Received message: '%v'", details.Message)
+		logMessage := fmt.Sprintf("Received message: '%v'", event.Message)
 		engine.Logger.Write(logger.LogData{Message: logMessage, Level: "info"})
 
-		if details.APIVersion != engine.APIVersion {
-			continue
-		}
-
-		switch details.Message {
+		switch event.Message {
 		case "Items by name ready":
-			engine.Socket.WriteToClient(details.ClientID, details.Message, details.APIVersion, details.Data)
+			engine.Socket.WriteToClient(event.ClientID, event.Message, event.APIVersion, event.Data)
 		case "Items by name not found":
-			engine.Socket.WriteToClient(details.ClientID, details.Message, details.APIVersion, details.Data)
+			engine.Socket.WriteToClient(event.ClientID, event.Message, event.APIVersion, event.Data)
 		}
 	}
 }
