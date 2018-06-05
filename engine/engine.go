@@ -99,8 +99,9 @@ func (engine *Engine) SubscribeOnEvents(inputTopic string) {
 		engine.Logger.Write(logger.LogData{Message: logMessage, Level: "warning"})
 	}
 
-	for event := range channel {
+	fmt.Println("Subscribed on events")
 
+	for event := range channel {
 		logMessage := fmt.Sprintf("Received message: '%v'", event.Message)
 		engine.Logger.Write(logger.LogData{Message: logMessage, Level: "info"})
 

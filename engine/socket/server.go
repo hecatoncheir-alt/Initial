@@ -90,6 +90,7 @@ func (server *Server) listenConnectedClient(client *Client) {
 
 		case "Need items by name":
 			eventData := broker.EventData{Message: event.Message, Data: event.Data}
+			eventData.ClientID = client.ID
 			server.Broker.WriteToTopic(server.SprootChannel, eventData)
 		}
 	}
@@ -111,8 +112,8 @@ func (server *Server) WriteToClient(clientID, message, APIVersion, data string) 
 	for _, connection := range server.Clients {
 		if connection.ID == clientID {
 
-			message := fmt.Sprintf("Writing message: %v to connected client: %v", message, clientID)
-			server.Logger.Write(logger.LogData{Message: message, Level: "info"})
+			eventMessage := fmt.Sprintf("Writing message: %v to connected client: %v", message, clientID)
+			server.Logger.Write(logger.LogData{Message: eventMessage, Level: "info"})
 
 			go connection.Write(message, server.APIVersion, data)
 			break
