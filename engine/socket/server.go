@@ -50,6 +50,7 @@ func (server *Server) SetUp(host string, port int) error {
 
 	message := fmt.Sprintf("Socket server listen on %v, port:%v \n", host, port)
 	server.Logger.Write(logger.LogData{Message: message, Level: "info"})
+	fmt.Println(message)
 
 	server.HTTPServer.ListenAndServe()
 	return nil
