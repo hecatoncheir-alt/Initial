@@ -53,13 +53,24 @@ func (engine *Engine) SetUpHTTPServer(staticFilesDirectory, host string, port in
 		eventData := logger.LogData{
 			Message: message,
 			Level:   "warning"}
-		go engine.Logger.Write(eventData)
+		go func() {
+			err := engine.Logger.Write(eventData)
+			if err != nil {
+				fmt.Println("Cant't write event: ", eventData)
+			}
+		}()
+
 		return err
 	}
 
 	message := fmt.Sprintf("Http server started: %v on port: %v", host, port)
 	eventData := logger.LogData{Message: message, Level: "info"}
-	go engine.Logger.Write(eventData)
+	go func() {
+		err := engine.Logger.Write(eventData)
+		if err != nil {
+			fmt.Println("Cant't write event: ", eventData)
+		}
+	}()
 
 	return nil
 }
@@ -72,14 +83,25 @@ func (engine *Engine) SetUpSocketServer(host string, port int, broker *broker.Br
 	if err != nil {
 		message := fmt.Sprintf("Socket server can't be started: %v on port: %v", host, port)
 		eventData := logger.LogData{Message: message, Level: "warning"}
-		go engine.Logger.Write(eventData)
+
+		go func() {
+			err := engine.Logger.Write(eventData)
+			if err != nil {
+				fmt.Println("Can't write event. Error: ", err)
+			}
+		}()
 
 		return err
 	}
 
 	message := fmt.Sprintf("Socket server started: %v on port: %v", host, port)
 	eventData := logger.LogData{Message: message, Level: "info"}
-	go engine.Logger.Write(eventData)
+	go func() {
+		err := engine.Logger.Write(eventData)
+		if err != nil {
+			fmt.Println("Can't write event to logger: ", err)
+		}
+	}()
 
 	return nil
 }
@@ -91,7 +113,10 @@ func (engine *Engine) SubscribeOnEvents() {
 	for event := range engine.Broker.InputChannel {
 
 		logMessage := fmt.Sprintf("Received message: '%v'", event.Message)
-		engine.Logger.Write(logger.LogData{Message: logMessage, Level: "info"})
+		err := engine.Logger.Write(logger.LogData{Message: logMessage, Level: "info"})
+		if err != nil {
+			fmt.Println("Can't write event to logger: ", err)
+		}
 
 		switch event.Message {
 		case "Items by name ready":

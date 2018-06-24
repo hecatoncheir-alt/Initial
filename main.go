@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"fmt"
 	"github.com/hecatoncheir/Broker"
 	"github.com/hecatoncheir/Configuration"
 	"github.com/hecatoncheir/Initial/engine"
@@ -28,16 +29,29 @@ func main() {
 		log.Fatal(err)
 	}
 
-	go puffer.SetUpSocketServer(
-		config.Production.SocketServer.Host,
-		config.Production.SocketServer.Port,
-		puffer.Broker, config.Production.SprootTopic)
+	go func() {
+		err := puffer.SetUpSocketServer(
+			config.Production.SocketServer.Host,
+			config.Production.SocketServer.Port,
+			puffer.Broker, config.Production.SprootTopic)
+
+		if err != nil {
+			fmt.Println("SetUpSocketServer faild with error: ", err)
+		}
+
+	}()
 
 	/// Send messages to other nsq channels
-	go puffer.SetUpHTTPServer(
-		config.Production.HTTPServer.StaticFilesDirectory,
-		config.Production.HTTPServer.Host,
-		config.Production.HTTPServer.Port)
+	go func() {
+		err := puffer.SetUpHTTPServer(
+			config.Production.HTTPServer.StaticFilesDirectory,
+			config.Production.HTTPServer.Host,
+			config.Production.HTTPServer.Port)
+
+		if err != nil {
+			fmt.Println("SetUpHTTPServer faild with error: ", err)
+		}
+	}()
 
 	// TODO: not for tests
 	//go PeriodicSendParseProductsOfCategoriesOfCompanyEvent(

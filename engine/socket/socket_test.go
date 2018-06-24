@@ -20,7 +20,11 @@ func SetUpSocketServer() {
 	testServer := New("v1.0", "", nil, nil)
 	goroutines.Done()
 	config := configuration.New()
-	testServer.SetUp(config.Development.SocketServer.Host, config.Development.SocketServer.Port)
+	err := testServer.SetUp(config.Development.SocketServer.Host, config.Development.SocketServer.Port)
+	if err != nil {
+		fmt.Println("SetUpSocketServer faild with: ", err)
+	}
+
 	defer testServer.HTTPServer.Close()
 }
 
@@ -70,9 +74,12 @@ func TestSocketServerCanHandleEvents(test *testing.T) {
 	}
 
 	for messageFromServer := range inputMessage {
+		if messageFromServer.Message == "Version of API" {
+			break
+		}
+
 		if messageFromServer.Message != "Version of API" {
 			test.Fail()
 		}
-		break
 	}
 }

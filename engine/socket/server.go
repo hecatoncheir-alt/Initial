@@ -55,12 +55,19 @@ func (server *Server) SetUp(host string, port int) error {
 
 	eventMessage := fmt.Sprintf("Socket server listen on %v, port:%v \n", host, port)
 	if server.Logger != nil {
-		server.Logger.Write(logger.LogData{Message: eventMessage, Level: "info"})
+		err := server.Logger.Write(logger.LogData{Message: eventMessage, Level: "info"})
+		if err != nil {
+			server.Log.Println(err)
+		}
 	}
 
 	server.Log.Println(eventMessage)
 
-	server.HTTPServer.ListenAndServe()
+	err := server.HTTPServer.ListenAndServe()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -80,7 +87,8 @@ func (server *Server) ClientConnectedHandler(response http.ResponseWriter, reque
 
 	eventMessage := fmt.Sprintf("Client: %v connected. Connected clients: %v", client.ID, len(server.Clients))
 	if server.Logger != nil {
-		server.Logger.Write(logger.LogData{Message: eventMessage, Level: "info"})
+		err := server.Logger.Write(logger.LogData{Message: eventMessage, Level: "info"})
+		server.Log.Println(err)
 	}
 
 	server.Log.Println(eventMessage)
@@ -95,7 +103,12 @@ func (server *Server) listenConnectedClient(client *Client) {
 
 		eventMessage := fmt.Sprintf("Received event: %v from connected client: %v", event, client.ID)
 		if server.Logger != nil {
-			go server.Logger.Write(logger.LogData{Message: eventMessage, Level: "info"})
+			go func() {
+				err := server.Logger.Write(logger.LogData{Message: eventMessage, Level: "info"})
+				if err != nil {
+					server.Log.Println(err)
+				}
+			}()
 		}
 
 		server.Log.Println(eventMessage)
@@ -130,7 +143,11 @@ func (server *Server) WriteToClient(clientID, message, APIVersion, data string) 
 
 			eventMessage := fmt.Sprintf("Writing message: %v to connected client: %v", message, clientID)
 			if server.Logger != nil {
-				server.Logger.Write(logger.LogData{Message: eventMessage, Level: "info"})
+				err := server.Logger.Write(logger.LogData{Message: eventMessage, Level: "info"})
+				if err != nil {
+					server.Log.Printf("Can't write event: %v to client: %v. Error: %v ",
+						eventMessage, clientID, err)
+				}
 			}
 
 			server.Log.Println(eventMessage)

@@ -39,13 +39,21 @@ func (server *Server) SetUp(staticFilesDirectory, host string, port int) error {
 
 	eventMessage := fmt.Sprintf("Http server listen on %v, port:%v \n", host, port)
 	if server.Logger != nil {
-		server.Logger.Write(logger.LogData{Message: eventMessage, Level: "info"})
+		err := server.Logger.Write(logger.LogData{Message: eventMessage, Level: "info"})
+		if err != nil {
+			server.Log.Println(err)
+		}
 	}
 
 	server.Log.Println(eventMessage)
 
 	server.HTTPServer.Handler = server.router
-	server.HTTPServer.ListenAndServe()
+
+	err := server.HTTPServer.ListenAndServe()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

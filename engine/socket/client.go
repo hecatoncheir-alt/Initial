@@ -43,7 +43,10 @@ func NewConnectedClient(clientConnection *websocket.Conn) *Client {
 				break
 			}
 
-			json.Unmarshal(messageBytes, &inputMessage)
+			err = json.Unmarshal(messageBytes, &inputMessage)
+			if err != nil {
+				client.Log.Printf("Fail unmarshal event: %v", err)
+			}
 
 			inputMessage.ClientID = client.ID
 			client.Channel <- inputMessage
@@ -63,6 +66,10 @@ func (client *Client) Write(message, APIVersion, data string) {
 		Data:       data}
 
 	client.wmu.Lock()
-	client.Connection.WriteJSON(event)
+	err := client.Connection.WriteJSON(event)
+	if err != nil {
+		client.Log.Printf("Fail write event: %v", err)
+	}
+
 	client.wmu.Unlock()
 }

@@ -23,7 +23,11 @@ func SetUpServer() {
 	if config.ServiceName == "" {
 		config.ServiceName = "Initial"
 	}
-	server.SetUp("", config.Development.HTTPServer.Host, config.Development.HTTPServer.Port)
+
+	err := server.SetUp("", config.Development.HTTPServer.Host, config.Development.HTTPServer.Port)
+	if err != nil {
+		server.Log.Printf("Faild SetUpServer with error: %v", err)
+	}
 }
 
 func TestHttpServerCanSendVersionOfAPI(test *testing.T) {
