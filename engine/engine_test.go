@@ -14,7 +14,8 @@ func TestIntegrationEngineCanBeSetUp(test *testing.T) {
 
 	engine := New(config.APIVersion, config.ServiceName, config.Development.LogunaTopic)
 
-	err := engine.SetUpBroker(config.Development.Broker.Host, config.Development.Broker.Port)
+	//err := engine.SetUpBroker(config.Development.EventBus.Host, config.Development.EventBus.Port)
+	err := engine.SetUpBroker(config.Development.EventBus.Host, 8181)
 	if err != nil {
 		test.Error(err)
 	}

@@ -2,8 +2,6 @@ package engine
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/hecatoncheir/Broker"
 	"github.com/hecatoncheir/Logger"
 
@@ -86,22 +84,12 @@ func (engine *Engine) SetUpSocketServer(host string, port int, broker *broker.Br
 	return nil
 }
 
-func (engine *Engine) SubscribeOnEvents(inputTopic string) {
-
-	/// Handle input messages from nsq channels
-	channel, err := engine.Broker.ListenTopic(inputTopic, engine.APIVersion)
-	if err != nil {
-		log.Fatal(err)
-
-		logMessage := fmt.Sprintf(
-			"Error on subscribe on %v: '%v'",
-			inputTopic, err)
-		engine.Logger.Write(logger.LogData{Message: logMessage, Level: "warning"})
-	}
+func (engine *Engine) SubscribeOnEvents() {
 
 	fmt.Println("Subscribed on events")
 
-	for event := range channel {
+	for event := range engine.Broker.InputChannel {
+
 		logMessage := fmt.Sprintf("Received message: '%v'", event.Message)
 		engine.Logger.Write(logger.LogData{Message: logMessage, Level: "info"})
 
@@ -111,5 +99,6 @@ func (engine *Engine) SubscribeOnEvents(inputTopic string) {
 		case "Items by name not found":
 			engine.Socket.WriteToClient(event.ClientID, event.Message, event.APIVersion, event.Data)
 		}
+
 	}
 }

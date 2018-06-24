@@ -3,10 +3,12 @@ package http
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/hecatoncheir/Logger"
 	"github.com/julienschmidt/httprouter"
+	"os"
 )
 
 type Server struct {
@@ -14,6 +16,7 @@ type Server struct {
 	HTTPServer *http.Server
 	router     *httprouter.Router
 	Logger     *logger.LogWriter
+	Log        *log.Logger
 }
 
 func New(apiVersion string, logger *logger.LogWriter) *Server {
@@ -21,6 +24,9 @@ func New(apiVersion string, logger *logger.LogWriter) *Server {
 		APIVersion: apiVersion,
 		Logger:     logger,
 		router:     httprouter.New()}
+
+	logPrefix := fmt.Sprintf("HttpServer ")
+	server.Log = log.New(os.Stdout, logPrefix, 3)
 
 	return &server
 }
@@ -32,8 +38,11 @@ func (server *Server) SetUp(staticFilesDirectory, host string, port int) error {
 	server.HTTPServer = &http.Server{Addr: fmt.Sprintf("%v:%v", host, port)}
 
 	eventMessage := fmt.Sprintf("Http server listen on %v, port:%v \n", host, port)
-	server.Logger.Write(logger.LogData{Message: eventMessage, Level: "info"})
-	fmt.Println(eventMessage)
+	if server.Logger != nil {
+		server.Logger.Write(logger.LogData{Message: eventMessage, Level: "info"})
+	}
+
+	server.Log.Println(eventMessage)
 
 	server.HTTPServer.Handler = server.router
 	server.HTTPServer.ListenAndServe()

@@ -21,8 +21,8 @@ func main() {
 		config.Production.LogunaTopic)
 
 	err := puffer.SetUpBroker(
-		config.Production.Broker.Host,
-		config.Production.Broker.Port)
+		config.Production.EventBus.Host,
+		config.Production.EventBus.Port)
 
 	if err != nil {
 		log.Fatal(err)
@@ -39,10 +39,17 @@ func main() {
 		config.Production.HTTPServer.Host,
 		config.Production.HTTPServer.Port)
 
-	go PeriodicSendParseProductsOfCategoriesOfCompanyEvent(
-		time.Hour*24, puffer.Broker, config.Production.SprootTopic)
+	// TODO: not for tests
+	//go PeriodicSendParseProductsOfCategoriesOfCompanyEvent(
+	//	time.Hour*24, puffer.Broker, config.Production.SprootTopic)
 
-	puffer.SubscribeOnEvents(config.Production.InitialTopic)
+	// TODO: for tests
+	event := broker.EventData{
+		Message: "Products of categories of companies must be parsed"}
+	puffer.Broker.Write(event)
+	// TODO: for tests end
+
+	puffer.SubscribeOnEvents()
 }
 
 func PeriodicSendParseProductsOfCategoriesOfCompanyEvent(
@@ -53,7 +60,7 @@ func PeriodicSendParseProductsOfCategoriesOfCompanyEvent(
 	time.Sleep(duration)
 	event := broker.EventData{
 		Message: "Products of categories of companies must be parsed"}
-	bro.WriteToTopic(topicWithDataForParser, event)
+	bro.Write(event)
 
 	go PeriodicSendParseProductsOfCategoriesOfCompanyEvent(duration, bro, topicWithDataForParser)
 }
